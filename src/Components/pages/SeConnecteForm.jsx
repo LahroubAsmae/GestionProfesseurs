@@ -13,7 +13,7 @@ const ConnexionForm = () => {
 
   return (
     <section className="h-screen flex items-center justify-center bg-gray-100">
-      <div className="container h-full px-6 py-24 flex flex-wrap items-center justify-center lg:justify-between">
+      <div className="container h-full px-6 py-3 flex flex-wrap items-center justify-center lg:justify-between">
         {/* Colonne gauche : Illustration */}
         <div className="hidden lg:block mb-12 md:mb-0 md:w-8/12 lg:w-6/12">
           <img
@@ -25,7 +25,7 @@ const ConnexionForm = () => {
 
         {/* Colonne droite : Formulaire */}
         <div className="md:w-8/12 lg:w-5/12 bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Inscription</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Connexion</h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Champ Email */}

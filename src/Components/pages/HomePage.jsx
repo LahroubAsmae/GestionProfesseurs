@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
-import SignupForm from './SeConnecteForm.jsx'; // Importation du formulaire
+import SignupForm from './SeConnecteForm.jsx';
 import InscriptionForm from './InscriptionForm.jsx';
+import Footer from './Footer.jsx';
+import Accueil from './accueil.jsx';
 
 const Homepage = () => {
-  const [isSignupVisible, setIsSignupVisible] = useState(false);  
-  const [isLoginVisible, setIsLoginVisible] = useState(false);  
+  const [activeComponent, setActiveComponent] = useState('accueil'); // État pour gérer l'affichage
 
   const handleSignupClick = () => {
-    setIsSignupVisible(true);
-    setIsLoginVisible(false); // Masquer l'autre formulaire si nécessaire
+    setActiveComponent('signup'); // Affiche le formulaire d'inscription
   };
 
   const handleLoginClick = () => {
-    setIsSignupVisible(false); // Masquer l'autre formulaire si nécessaire
-    setIsLoginVisible(true);
+    setActiveComponent('login'); // Affiche le formulaire de connexion
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Passe chaque fonction séparément en prop */}
+    <div className="min-h-screen bg-gray-50 ">
       <Navbar onSignupClick={handleSignupClick} onLoginClick={handleLoginClick} />
-    
-      {/* Affiche le bon formulaire selon l'état */}
-      {isSignupVisible &&<InscriptionForm /> }
-      {isLoginVisible && <SignupForm /> }
+
+      {/* Affichage conditionnel du composant actif */}
+      {activeComponent === 'accueil' && <Accueil />}
+      {activeComponent === 'signup' && <InscriptionForm />}
+      {activeComponent === 'login' && <SignupForm />}
+
+      <Footer />
     </div>
   );
 };

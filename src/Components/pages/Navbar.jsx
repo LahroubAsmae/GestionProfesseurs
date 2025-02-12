@@ -2,12 +2,12 @@ import React from 'react';
 
 const Navbar = ({ onSignupClick,onLoginClick }) => {
   return (
-    <div className="w-full bg-blue-500 shadow-lg">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <div className="w-full bg-blue-500 shadow-lg ">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 h-20">
+        <div className="flex items-center justify-between h-20">
           {/* Logo and Project Name */}
           <div className="flex items-center">
-            <span className="ml-2 text-xl font-bold text-white">Gestion Professeurs</span>
+            <span className="ml-2 text-xl font-bold text-white">Espace Professeurs</span>
           </div>
 
           {/* Buttons */}

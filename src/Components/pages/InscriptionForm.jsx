@@ -12,8 +12,8 @@ const InscriptionForm = () => {
   };
 
   return (
-    <section className="h-screen flex items-center justify-center bg-gray-100">
-      <div className="container h-full px-6 py-24 flex flex-wrap items-center justify-center lg:justify-between">
+    <section className="h-screen flex items-center justify-center bg-gray-100 ">
+      <div className="container h-full px-6 py-1 flex flex-wrap items-center justify-center lg:justify-between">
         {/* Colonne gauche : Illustration */}
         <div className="hidden lg:block mb-12 md:mb-0 md:w-8/12 lg:w-6/12">
           <img
