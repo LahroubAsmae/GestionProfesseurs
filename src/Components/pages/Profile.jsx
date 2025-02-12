@@ -3,15 +3,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Select from "react-select";
 import { useDropzone } from "react-dropzone";
-import { useState } from "react";
-import api from "../Api/professeurApi"; // Si tu utilises un fichier API
+import { useState, useEffect } from "react";
 
 const schema = yup.object().shape({
   nom: yup.string().required("Le nom est obligatoire"),
   prenom: yup.string().required("Le prénom est obligatoire"),
   email: yup.string().email("Email invalide").required("Champ requis"),
   telephone: yup.string()
-    .matches(/^\+?[0-9]{10}$/, "Numéro invalide (10 chiffres)")
+    .matches(/\+?[0-9]{10}/, "Numéro invalide (10 chiffres)")
     .required("Champ requis"),
   matieres: yup.array().min(1, "Sélectionnez au moins une matière").required("Champ requis"),
   statut: yup.string().required("Champ requis"),
@@ -21,12 +20,18 @@ const schema = yup.object().shape({
     .test("fileType", "Format non supporté (JPEG/PNG)", value => value && ["image/jpeg", "image/png"].includes(value.type))
 });
 
-const ProfesseurForm = () => {
+const Profile = () => {
   const { register, control, handleSubmit, formState: { errors }, setValue } = useForm({
     resolver: yupResolver(schema)
   });
 
   const [preview, setPreview] = useState(null);
+
+  useEffect(() => {
+    const storedUserData = JSON.parse(localStorage.getItem("userData")) || {};
+    Object.keys(storedUserData).forEach((key) => setValue(key, storedUserData[key]));
+    if (storedUserData.photo) setPreview(storedUserData.photo);
+  }, [setValue]);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { 'image/*': ['.jpeg', '.png'] },
@@ -37,39 +42,24 @@ const ProfesseurForm = () => {
     }
   });
 
-  const optionsMatières = [
+  const optionsMatieres = [
     { value: "maths", label: "Mathématiques" },
     { value: "physique", label: "Physique" },
     { value: "informatique", label: "Informatique" }
   ];
 
-  const onSubmit = async (data) => {
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        if (key === "matieres") {
-          formData.append(key, JSON.stringify(data[key].map(m => m.value))); // ✅ Convertit en tableau JSON
-        } else {
-          formData.append(key, data[key]);
-        }
-      });
-
-      console.log("Données envoyées :", Object.fromEntries(formData.entries())); // 🔍 Vérifie les données avant envoi
-
-      await api.post("/professors", formData);
-      alert("Professeur ajouté !");
-    } catch (error) {
-      console.error("Erreur lors de l'ajout :", error.response ? error.response.data : error.message);
-    }
+  const onSubmit = (data) => {
+    data.photo = preview;
+    localStorage.setItem("userData", JSON.stringify(data));
+    alert("Profil mis à jour !");
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen w-full bg-gray-100 py-6">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        {/* Effet de carte flottante */}
+      <div className="relative py-3 sm:max-w-2xl sm:mx-auto"> {/* Augmentation de la largeur */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="relative px-6 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-md">
+        <form onSubmit={handleSubmit(onSubmit)} className="relative px-10 py-12 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-2xl"> {/* Ajustement de la largeur */}
           <div className="mb-4">
             <label className="block text-gray-700 font-medium">Nom *</label>
             <input {...register("nom")} className="w-full border rounded-md p-2" />
@@ -100,23 +90,10 @@ const ProfesseurForm = () => {
               name="matieres"
               control={control}
               render={({ field }) => (
-                <Select {...field} isMulti options={optionsMatières} className="w-full" />
+                <Select {...field} isMulti options={optionsMatieres} className="w-full" />
               )}
             />
             {errors.matieres && <p className="text-red-500 text-sm">{errors.matieres.message}</p>}
-          </div>
-
-          <div className="mb-10">
-            <label className="block text-gray-700 font-medium">Statut *</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input type="radio" value="permanent" {...register("statut")} className="mr-2" /> Permanent
-              </label>
-              <label className="flex items-center">
-                <input type="radio" value="vacataire" {...register("statut")} className="mr-2" /> Vacataire
-              </label>
-            </div>
-            {errors.statut && <p className="text-red-500 text-sm">{errors.statut.message}</p>}
           </div>
 
           <div className="mb-4">
@@ -132,11 +109,11 @@ const ProfesseurForm = () => {
             {errors.photo && <p className="text-red-500 text-sm">{errors.photo.message}</p>}
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-green-600 transition">Enregistrer</button>
+          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-green-600 transition">Mettre à jour</button>
         </form>
       </div>
     </div>
   );
 };
 
-export default ProfesseurForm;
+export default Profile;

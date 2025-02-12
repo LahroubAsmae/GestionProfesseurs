@@ -24,7 +24,7 @@ const ExcelUploader = () => {
         const jsonData = XLSX.utils.sheet_to_json(sheet);
 
         // Vérifier si les colonnes requises existent
-        const requiredColumns = ["Nom", "Email", "Age"];
+        const requiredColumns = ["Nom", "Email", "Age","Telephone","MatièresEnseignées","photo"];
         const sheetColumns = Object.keys(jsonData[0] || {});
 
         for (const col of requiredColumns) {
@@ -49,28 +49,63 @@ const ExcelUploader = () => {
   };
 
   return (
-    <div className="p-4">
-      <input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} />
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
+      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
+        {/* Effet de carte flottante */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+
+        <div className="relative px-6 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+          <div className="max-w-md mx-auto text-center">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Importation de fichier Excel
+            </h2>
+
+            {/* Input File */}
+            <div className="relative">
+              <input type="file" accept=".xls,.xlsx" onChange={handleFileUpload} className="hidden" id="fileUpload" />
+              <label
+                htmlFor="fileUpload"
+                className="cursor-pointer block bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition duration-300"
+              >
+                Choisir un fichier
+              </label>
+            </div>
+
+            {/* Message d'erreur */}
+            {error && <p className="text-red-600 font-semibold mt-4">{error}</p>}
+          </div>
+        </div>
+      </div>
+
+      {/* Tableau des données importées */}
       {data.length > 0 && (
-        <table className="mt-4 border-collapse border border-gray-300">
-          <thead>
-            <tr>
-              <th className="border border-gray-300 px-4 py-2">Nom</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">Age</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 px-4 py-2">{row.Nom}</td>
-                <td className="border border-gray-300 px-4 py-2">{row.Email}</td>
-                <td className="border border-gray-300 px-4 py-2">{row.Age}</td>
+        <div className="mt-10 w-full max-w-4xl mx-auto bg-white shadow-lg rounded-3xl p-6 overflow-x-auto">
+          <h3 className="text-xl font-semibold text-gray-700 mb-4 text-center">Données Importées</h3>
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-blue-500 text-white">
+                <th className="border border-gray-300 px-6 py-3">Nom</th>
+                <th className="border border-gray-300 px-6 py-3">Email</th>
+                <th className="border border-gray-300 px-6 py-3">Age</th>
+                <th className="border border-gray-300 px-6 py-3">Telephone</th>
+                <th className="border border-gray-300 px-6 py-3">Matières enseignées</th>
+                <th className="border border-gray-300 px-6 py-3">Photos</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((row, index) => (
+                <tr key={index} className="text-center even:bg-gray-100 hover:bg-gray-200 transition">
+                  <td className="border border-gray-300 px-6 py-3">{row.Nom}</td>
+                  <td className="border border-gray-300 px-6 py-3">{row.Email}</td>
+                  <td className="border border-gray-300 px-6 py-3">{row.Age}</td>
+                  <td className="border border-gray-300 px-6 py-3">{row.Telephone}</td>
+                  <td className="border border-gray-300 px-6 py-3">{row.MatièresEnseignées}</td>
+                  <td className="border border-gray-300 px-6 py-3">{row.photo}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
