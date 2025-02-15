@@ -36,6 +36,27 @@ export const addProfessor = async (req, res) => {
       .json({ message: "Erreur lors de l'ajout du professeur", error: err });
   }
 };
+export const getProfessorProfile = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    const professor = await Professor.findOne({ email });
+    if (!professor) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Professeur non trouvé" });
+    }
+
+    res.status(200).json({ success: true, professor });
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération du profil du professeur :",
+      error
+    );
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+};
+
 // Récupérer un professeur par ID
 export const getProfessorById = async (req, res) => {
   try {
@@ -107,15 +128,23 @@ export const importProfessors = async (req, res) => {
           message: "Toutes les colonnes obligatoires doivent être remplies.",
         });
       }
-    }
+
+      // Vérifier que le statut est valide
+      if (!["permanent", "vacataire"].includes(status)) {
+        return res.status(400).json({
+          message: `Statut invalide pour ${firstName} ${lastName}. Doit être "permanent" ou "vacataire".`,
+        });
+      }
+    } // <-- Accolade fermante manquante pour la boucle `for`
 
     // Insérer les données dans MongoDB
     await Professor.insertMany(professors);
 
     res.status(200).json({ message: "Importation réussie !" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de l'importation des professeurs." });
+    res.status(500).json({
+      message: "Erreur lors de l'importation des professeurs.",
+      error: error.message,
+    });
   }
 };

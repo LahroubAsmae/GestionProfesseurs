@@ -1,64 +1,67 @@
-import Professor from "../models/Professor.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Inscription d'un professeur
+// Inscription d'un utilisateur
 export const signup = async (req, res) => {
-  const { firstName, lastName, email, phone, subjects, status, password } =
-    req.body;
+  const { name, email, password } = req.body;
 
   try {
     // Vérifier si l'email existe déjà
-    const existingProfessor = await Professor.findOne({ email });
-    if (existingProfessor) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res.status(400).json({ message: "Cet email est déjà utilisé." });
     }
 
-    // Créer un nouveau professeur
-    const professor = await Professor.create({
-      firstName,
-      lastName,
+    // Créer un nouvel utilisateur
+    const user = await User.create({
+      name,
       email,
-      phone,
-      subjects,
-      status,
       password, // Le mot de passe sera hashé automatiquement grâce au middleware
     });
 
     // Générer un token JWT
-    const token = jwt.sign({ id: professor._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h", // Le token expire après 1 heure
     });
 
-    res.status(201).json({ token, professor });
+    // Retourner le token et les informations de l'utilisateur (sans le mot de passe)
+    const userResponse = { ...user._doc };
+    delete userResponse.password;
+
+    res.status(201).json({ token, user: userResponse });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de l'inscription", error });
+    console.error("Erreur lors de l'inscription :", error);
+    res
+      .status(500)
+      .json({ message: "Erreur lors de l'inscription", error: error.message });
   }
 };
-
-// Connexion d'un professeur
-export const signin = async (req, res) => {
+//Login
+export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Vérifier si le professeur existe
-    const professor = await Professor.findOne({ email });
-    if (!professor) {
-      return res.status(404).json({ message: "Professeur non trouvé." });
+    // Vérifier si l'utilisateur existe
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email ou mot de passe incorrect" });
     }
 
     // Vérifier le mot de passe
-    const isMatch = await professor.matchPassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Mot de passe incorrect." });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email ou mot de passe incorrect" });
     }
 
-    // Générer un token JWT
-    const token = jwt.sign({ id: professor._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.status(200).json({ token, professor });
+    // Connexion réussie
+    res.status(200).json({ success: true, message: "Connexion réussie", user });
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la connexion", error });
+    console.error("Erreur lors de la connexion :", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };

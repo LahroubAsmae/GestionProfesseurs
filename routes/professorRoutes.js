@@ -6,6 +6,7 @@ import {
   updateProfessor,
   deleteProfessor,
   importProfessors,
+  getProfessorById,
 } from "../controllers/professorController.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get("/", getProfessors);
 router.put("/:id", updateProfessor);
 router.delete("/:id", deleteProfessor);
 router.post("/import", importProfessors);
+router.get("/:id", getProfessorById);
 
 export default router;

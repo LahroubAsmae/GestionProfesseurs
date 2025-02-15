@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import Professor from "../models/Professor.js";
+import User from "../models/User";
+("../models/User.js");
 
 export const protect = async (req, res, next) => {
   let token;
@@ -16,7 +17,7 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Ajouter le professeur à la requête
-      req.professor = await Professor.findById(decoded.id).select("-password");
+      req.professor = await User.findById(decoded.id).select("-password");
 
       next();
     } catch (error) {
