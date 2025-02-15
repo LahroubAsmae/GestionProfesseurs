@@ -1,11 +1,24 @@
 import React from "react";
-import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
 import QRCode from "qrcode";
 
 // Styles PDF
 const styles = StyleSheet.create({
   page: { flexDirection: "row", justifyContent: "center", padding: 20 },
-  card: { width: 250, height: 150, padding: 10, border: "1px solid black", borderRadius: 5 },
+  card: {
+    width: 250,
+    height: 150,
+    padding: 10,
+    border: "1px solid black",
+    borderRadius: 5,
+  },
   name: { fontSize: 14, fontWeight: "bold" },
   subject: { fontSize: 12, marginTop: 5 },
   image: { width: 50, height: 50, borderRadius: "50%", marginBottom: 5 },
@@ -23,7 +36,6 @@ const generateQRCode = async (name, subject) => {
   }
 };
 
-
 // Composant PDF
 const ProfessionalCard = ({ name, subject, photo, qrData }) => {
   const [qrCodeImage, setQrCodeImage] = React.useState("");
@@ -31,7 +43,6 @@ const ProfessionalCard = ({ name, subject, photo, qrData }) => {
   React.useEffect(() => {
     generateQRCode(name, subject).then(setQrCodeImage);
   }, [name, subject]);
-  
 
   return (
     <Document>

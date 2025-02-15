@@ -1,138 +1,195 @@
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import Select from "react-select";
-import { useDropzone } from "react-dropzone";
 import { useState } from "react";
-import api from "../Api/professeurApi"; // Si tu utilises un fichier API
-
-const schema = yup.object().shape({
-  nom: yup.string().required("Le nom est obligatoire"),
-  prenom: yup.string().required("Le prénom est obligatoire"),
-  email: yup.string().email("Email invalide").required("Champ requis"),
-  telephone: yup.string()
-    .matches(/^\+?[0-9]{10}$/, "Numéro invalide (10 chiffres)")
-    .required("Champ requis"),
-  matieres: yup.array().min(1, "Sélectionnez au moins une matière").required("Champ requis"),
-  statut: yup.string().required("Champ requis"),
-  photo: yup.mixed()
-    .required("Une photo est requise")
-    .test("fileSize", "Fichier trop lourd (max 5Mo)", value => value && value.size <= 5000000)
-    .test("fileType", "Format non supporté (JPEG/PNG)", value => value && ["image/jpeg", "image/png"].includes(value.type))
-});
+import axios from "axios";
+import { useDropzone } from "react-dropzone";
 
 const ProfesseurForm = () => {
-  const { register, control, handleSubmit, formState: { errors }, setValue } = useForm({
-    resolver: yupResolver(schema)
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subjects: "",
+    status: "",
+    profilePicture: null,
   });
 
+  const [message, setMessage] = useState({ text: "", type: "" });
+  const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
 
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { 'image/*': ['.jpeg', '.png'] },
+    accept: { "image/*": [".jpeg", ".png"] },
     maxFiles: 1,
     onDrop: (files) => {
-      setValue("photo", files[0]);
+      setFormData({ ...formData, profilePicture: files[0] });
       setPreview(URL.createObjectURL(files[0]));
-    }
+    },
   });
 
-  const optionsMatières = [
-    { value: "maths", label: "Mathématiques" },
-    { value: "physique", label: "Physique" },
-    { value: "informatique", label: "Informatique" }
-  ];
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validatePhone = (phone) => /^[0-9]{10}$/.test(phone);
 
-  const onSubmit = async (data) => {
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateEmail(formData.email)) {
+      setMessage({ text: "Email invalide", type: "error" });
+      return;
+    }
+    if (!validatePhone(formData.phone)) {
+      setMessage({ text: "Numéro de téléphone invalide", type: "error" });
+      return;
+    }
+
+    const submitData = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      submitData.append(key, value);
+    });
+
     try {
-      const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        if (key === "matieres") {
-          formData.append(key, JSON.stringify(data[key].map(m => m.value))); // ✅ Convertit en tableau JSON
-        } else {
-          formData.append(key, data[key]);
-        }
+      setLoading(true);
+      const checkResponse = await axios.get(
+        `http://localhost:5000/api/professors?email=${formData.email}`
+      );
+      if (checkResponse.data.exists) {
+        setMessage({ text: "Ce professeur existe déjà !", type: "error" });
+        setLoading(false);
+        return;
+      }
+
+      await axios.post("http://localhost:5000/api/professors", submitData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log("Données envoyées :", Object.fromEntries(formData.entries())); // 🔍 Vérifie les données avant envoi
-
-      await api.post("/professors", formData);
-      alert("Professeur ajouté !");
+      setMessage({ text: "Professeur ajouté avec succès !", type: "success" });
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        subjects: "",
+        status: "",
+        profilePicture: null,
+      });
+      setPreview(null);
     } catch (error) {
-      console.error("Erreur lors de l'ajout :", error.response ? error.response.data : error.message);
+      setMessage({
+        text: "Erreur lors de l'ajout du professeur.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen w-full bg-gray-100 py-6">
       <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        {/* Effet de carte flottante */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="relative px-6 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-md">
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Nom *</label>
-            <input {...register("nom")} className="w-full border rounded-md p-2" />
-            {errors.nom && <p className="text-red-500 text-sm">{errors.nom.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Prénom *</label>
-            <input {...register("prenom")} className="w-full border rounded-md p-2" />
-            {errors.prenom && <p className="text-red-500 text-sm">{errors.prenom.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Email *</label>
-            <input type="email" {...register("email")} className="w-full border rounded-md p-2" />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Téléphone *</label>
-            <input {...register("telephone")} className="w-full border rounded-md p-2" placeholder="06********" />
-            {errors.telephone && <p className="text-red-500 text-sm">{errors.telephone.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Matières enseignées *</label>
-            <Controller
-              name="matieres"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} isMulti options={optionsMatières} className="w-full" />
-              )}
-            />
-            {errors.matieres && <p className="text-red-500 text-sm">{errors.matieres.message}</p>}
-          </div>
-
-          <div className="mb-10">
-            <label className="block text-gray-700 font-medium">Statut *</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input type="radio" value="permanent" {...register("statut")} className="mr-2" /> Permanent
+        <form
+          onSubmit={handleSubmit}
+          className="relative px-6 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-md"
+        >
+          <h2 className="text-2xl font-semibold text-center mb-4">
+            Ajouter un professeur
+          </h2>
+          {message.text && (
+            <p
+              className={`text-center ${
+                message.type === "error" ? "text-red-500" : "text-green-500"
+              }`}
+            >
+              {message.text}
+            </p>
+          )}
+          {["firstName", "lastName", "email", "phone"].map((field) => (
+            <div key={field} className="mb-4">
+              <label className="block text-gray-700 font-medium">
+                {field === "firstName"
+                  ? "Prénom"
+                  : field === "lastName"
+                  ? "Nom"
+                  : field === "email"
+                  ? "Email"
+                  : "Téléphone"}
               </label>
-              <label className="flex items-center">
-                <input type="radio" value="vacataire" {...register("statut")} className="mr-2" /> Vacataire
-              </label>
+              <input
+                type="text"
+                id={field}
+                value={formData[field]}
+                onChange={handleChange}
+                className="w-full border rounded-md p-2"
+                required
+              />
             </div>
-            {errors.statut && <p className="text-red-500 text-sm">{errors.statut.message}</p>}
-          </div>
-
+          ))}
           <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Photo de profil *</label>
-            <div {...getRootProps()} className="border-2 border-dashed p-4 text-center cursor-pointer rounded-md">
+            <label className="block text-gray-700 font-medium">
+              Matières *
+            </label>
+            <select
+              id="subjects"
+              value={formData.subjects}
+              onChange={handleChange}
+              className="w-full border rounded-md p-2"
+              required
+            >
+              <option value="">Sélectionner une matière</option>
+              {["Mathématiques", "Physique", "Informatique", "Français"].map(
+                (subject) => (
+                  <option key={subject} value={subject}>
+                    {subject}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium">Statut *</label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full border rounded-md p-2"
+              required
+            >
+              <option value="">Sélectionner un statut</option>
+              <option value="Permanent">Permanent</option>
+              <option value="Vacataire">Vacataire</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium">
+              Photo de profil *
+            </label>
+            <div
+              {...getRootProps()}
+              className="border-2 border-dashed p-4 text-center cursor-pointer rounded-md"
+            >
               <input {...getInputProps()} />
               {preview ? (
-                <img src={preview} alt="Prévisualisation" className="w-32 mx-auto" />
+                <img
+                  src={preview}
+                  alt="Prévisualisation"
+                  className="w-32 mx-auto"
+                />
               ) : (
-                <p className="text-gray-500">Glissez-déposez une image ici, ou cliquez pour sélectionner</p>
+                <p className="text-gray-500">
+                  Glissez-déposez une image ici, ou cliquez pour sélectionner
+                </p>
               )}
             </div>
-            {errors.photo && <p className="text-red-500 text-sm">{errors.photo.message}</p>}
           </div>
-
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-green-600 transition">Enregistrer</button>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-green-600 transition"
+          >
+            {loading ? "Ajout..." : "Ajouter"}
+          </button>
         </form>
       </div>
     </div>

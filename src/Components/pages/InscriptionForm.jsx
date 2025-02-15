@@ -1,14 +1,40 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Pour les requêtes HTTP
 
 const InscriptionForm = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log("Données soumises :", data);
-    alert("Inscription réussie !");
-    navigate("/menu");
+  const onSubmit = async (data) => {
+    try {
+      // Envoyer les données au backend
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/signup",
+        data
+      );
+
+      // Afficher un message de succès
+      alert("Inscription réussie !");
+      console.log("Réponse du backend :", response.data);
+
+      // Rediriger l'utilisateur vers la page de connexion ou une autre page
+      navigate("/menu");
+    } catch (error) {
+      // Gérer les erreurs
+      console.error("Erreur lors de l'inscription :", error);
+      if (error.response) {
+        // Afficher le message d'erreur du backend
+        alert(error.response.data.message || "Erreur lors de l'inscription");
+      } else {
+        alert("Erreur de connexion au serveur");
+      }
+    }
   };
 
   return (
@@ -25,63 +51,63 @@ const InscriptionForm = () => {
 
         {/* Colonne droite : Formulaire */}
         <div className="md:w-8/12 lg:w-5/12 bg-white p-8 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Inscription</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
+            Inscription
+          </h2>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Champ Nom */}
             <div className="relative mb-6">
               <input
                 type="text"
-                {...register("nom", { required: "Le nom est requis" })}
+                {...register("name", { required: "Le nom est requis" })}
                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Nom"
               />
-              {errors.nom && <p className="text-red-500 text-sm">{errors.nom.message}</p>}
-            </div>
-
-            {/* Champ Prénom */}
-            <div className="relative mb-6">
-              <input
-                type="text"
-                {...register("prenom", { required: "Le prénom est requis" })}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Prénom"
-              />
-              {errors.prenom && <p className="text-red-500 text-sm">{errors.prenom.message}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
             </div>
 
             {/* Champ Email */}
             <div className="relative mb-6">
               <input
                 type="email"
-                {...register("email", { 
-                  required: "L'email est requis", 
+                {...register("email", {
+                  required: "L'email est requis",
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/i,
-                    message: "Email invalide"
-                  }
+                    message: "Email invalide",
+                  },
                 })}
                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Email"
               />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Champ Mot de passe */}
             <div className="relative mb-6">
               <input
                 type="password"
-                {...register("password", { 
-                  required: "Le mot de passe est requis", 
+                {...register("password", {
+                  required: "Le mot de passe est requis",
                   minLength: {
                     value: 6,
-                    message: "Le mot de passe doit contenir au moins 6 caractères"
-                  }
+                    message:
+                      "Le mot de passe doit contenir au moins 6 caractères",
+                  },
                 })}
                 className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
                 placeholder="Mot de passe"
               />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Bouton d'inscription */}
