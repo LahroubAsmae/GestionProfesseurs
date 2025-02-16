@@ -1,6 +1,11 @@
-const fs = require('fs');
-const path = require('path');
-const multer = require('multer');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import multer from 'multer';
+
+// Obtenir __dirname en mode ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Définir le chemin complet du dossier 'uploads'
 const uploadDir = path.join(__dirname, 'uploads');
@@ -17,7 +22,4 @@ const storage = multer.diskStorage({
 });
 
 // Initialisation de multer avec la configuration de stockage
-const upload = multer({ storage });
-
-// Exporter la configuration multer pour l'utiliser ailleurs dans ton code
-module.exports = upload;
+export const upload = multer({ storage });

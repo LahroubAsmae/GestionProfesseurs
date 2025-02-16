@@ -16,7 +16,7 @@ export const getProfessorProfile = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur" });
   }
-};
+}; 
 
 // Mise à jour du profil professeur par ID
 export const updateProfessorProfile = async (req, res) => {
