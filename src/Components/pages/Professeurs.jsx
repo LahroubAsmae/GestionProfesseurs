@@ -36,6 +36,8 @@ const ProfesseurForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation des champs
     if (!validateEmail(formData.email)) {
       setMessage({ text: "Email invalide", type: "error" });
       return;
@@ -45,6 +47,7 @@ const ProfesseurForm = () => {
       return;
     }
 
+    // Préparation des données pour l'envoi
     const submitData = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       submitData.append(key, value);
@@ -52,8 +55,10 @@ const ProfesseurForm = () => {
 
     try {
       setLoading(true);
+
+      // Vérifier si le professeur existe déjà
       const checkResponse = await axios.get(
-        `http://localhost:5000/api/professors?email=${formData.email}`
+        `http://localhost:5000/api/admin?email=${formData.email}`
       );
       if (checkResponse.data.exists) {
         setMessage({ text: "Ce professeur existe déjà !", type: "error" });
@@ -61,11 +66,19 @@ const ProfesseurForm = () => {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/professors", submitData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // Envoyer les données au backend
+      const response = await axios.post(
+        "http://localhost:5000/api/admin/addprofessor", // Utilisez la route correcte
+        submitData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
+      // Afficher un message de succès
       setMessage({ text: "Professeur ajouté avec succès !", type: "success" });
+
+      // Réinitialiser le formulaire
       setFormData({
         firstName: "",
         lastName: "",
@@ -77,10 +90,12 @@ const ProfesseurForm = () => {
       });
       setPreview(null);
     } catch (error) {
+      // Gérer les erreurs
       setMessage({
         text: "Erreur lors de l'ajout du professeur.",
         type: "error",
       });
+      console.error("Erreur :", error);
     } finally {
       setLoading(false);
     }

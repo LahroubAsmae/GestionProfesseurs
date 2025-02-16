@@ -24,7 +24,7 @@ const InscriptionForm = () => {
       console.log("Réponse du backend :", response.data);
 
       // Rediriger l'utilisateur vers la page de connexion ou une autre page
-      navigate("/menu");
+      navigate("/Connection");
     } catch (error) {
       // Gérer les erreurs
       console.error("Erreur lors de l'inscription :", error);
@@ -107,6 +107,21 @@ const InscriptionForm = () => {
                 <p className="text-red-500 text-sm">
                   {errors.password.message}
                 </p>
+              )}
+            </div>
+
+            {/* Champ Rôle */}
+            <div className="relative mb-6">
+              <select
+                {...register("role", { required: "Le rôle est requis" })}
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Sélectionnez un rôle</option>
+                <option value="admin">Admin</option>
+                <option value="professor">Professeur</option>
+              </select>
+              {errors.role && (
+                <p className="text-red-500 text-sm">{errors.role.message}</p>
               )}
             </div>
 

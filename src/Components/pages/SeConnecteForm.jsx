@@ -1,8 +1,9 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const ConnexionForm = () => {
+const LoginForm = () => {
   const {
     register,
     handleSubmit,
@@ -16,11 +17,16 @@ const ConnexionForm = () => {
         "http://localhost:5000/api/auth/login",
         data
       );
-      if (response.data.success) {
-        alert("Connexion réussie !");
-        navigate("/menu"); // Redirigez l'utilisateur après une connexion réussie
+
+      // Sauvegarder le token, le rôle et l'email dans le localStorage
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("role", response.data.role);
+      localStorage.setItem("email", data.email); // Sauvegarde de l'email
+
+      if (response.data.role === "admin") {
+        navigate("/menu");
       } else {
-        alert("Échec de la connexion : " + response.data.message);
+        navigate("/profile");
       }
     } catch (error) {
       console.error("Erreur lors de la connexion :", error);
@@ -91,4 +97,4 @@ const ConnexionForm = () => {
   );
 };
 
-export default ConnexionForm;
+export default LoginForm;

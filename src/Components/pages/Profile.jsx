@@ -1,117 +1,242 @@
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import Select from "react-select";
-import { useDropzone } from "react-dropzone";
-import { useState, useEffect } from "react";
-
-const schema = yup.object().shape({
-  nom: yup.string().required("Le nom est obligatoire"),
-  prenom: yup.string().required("Le prénom est obligatoire"),
-  email: yup.string().email("Email invalide").required("Champ requis"),
-  telephone: yup.string()
-    .matches(/\+?[0-9]{10}/, "Numéro invalide (10 chiffres)")
-    .required("Champ requis"),
-  matieres: yup.array().min(1, "Sélectionnez au moins une matière").required("Champ requis"),
-  statut: yup.string().required("Champ requis"),
-  photo: yup.mixed()
-    .required("Une photo est requise")
-    .test("fileSize", "Fichier trop lourd (max 5Mo)", value => value && value.size <= 5000000)
-    .test("fileType", "Format non supporté (JPEG/PNG)", value => value && ["image/jpeg", "image/png"].includes(value.type))
-});
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const Profile = () => {
-  const { register, control, handleSubmit, formState: { errors }, setValue } = useForm({
-    resolver: yupResolver(schema)
+  const [professor, setProfessor] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    subjects: "",
+    status: "",
   });
-
-  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    const storedUserData = JSON.parse(localStorage.getItem("userData")) || {};
-    Object.keys(storedUserData).forEach((key) => setValue(key, storedUserData[key]));
-    if (storedUserData.photo) setPreview(storedUserData.photo);
-  }, [setValue]);
+    const email = localStorage.getItem("email");
+    const token = localStorage.getItem("token");
 
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: { 'image/*': ['.jpeg', '.png'] },
-    maxFiles: 1,
-    onDrop: (files) => {
-      setValue("photo", files[0]);
-      setPreview(URL.createObjectURL(files[0]));
-    }
-  });
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/professor/profile/${email}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setProfessor(response.data.professor);
+        setFormData({
+          firstName: response.data.professor.firstName,
+          lastName: response.data.professor.lastName,
+          email: response.data.professor.email,
+          phone: response.data.professor.phone,
+          subjects: response.data.professor.subjects,
+          status: response.data.professor.status,
+        });
+      } catch (error) {
+        console.error("Erreur lors de la récupération du profil :", error);
+      }
+    };
 
-  const optionsMatieres = [
-    { value: "maths", label: "Mathématiques" },
-    { value: "physique", label: "Physique" },
-    { value: "informatique", label: "Informatique" }
-  ];
+    fetchProfile();
+  }, []);
 
-  const onSubmit = (data) => {
-    data.photo = preview;
-    localStorage.setItem("userData", JSON.stringify(data));
-    alert("Profil mis à jour !");
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Token manquant, veuillez vous reconnecter.");
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/professor/update`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setProfessor(response.data.professor);
+      setIsEditing(false);
+      alert("Profil mis à jour avec succès");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du profil :", error);
+      alert(
+        "Erreur lors de la mise à jour du profil : " +
+          error.response?.data?.message || error.message
+      );
+    }
+  };
+
+  if (!professor) return <div>Chargement du profil...</div>;
+
   return (
-    <div className="flex justify-center items-center min-h-screen w-full bg-gray-100 py-6">
-      <div className="relative py-3 sm:max-w-2xl sm:mx-auto"> {/* Augmentation de la largeur */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+    <div className="p-6 bg-white shadow-md rounded w-full sm:w-96 mx-auto mt-10">
+      <h2 className="text-xl mb-4 text-center font-semibold">
+        Profil du Professeur
+      </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="relative px-10 py-12 bg-white shadow-lg sm:rounded-3xl sm:p-20 w-full max-w-2xl"> {/* Ajustement de la largeur */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Nom *</label>
-            <input {...register("nom")} className="w-full border rounded-md p-2" />
-            {errors.nom && <p className="text-red-500 text-sm">{errors.nom.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Prénom *</label>
-            <input {...register("prenom")} className="w-full border rounded-md p-2" />
-            {errors.prenom && <p className="text-red-500 text-sm">{errors.prenom.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Email *</label>
-            <input type="email" {...register("email")} className="w-full border rounded-md p-2" />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Téléphone *</label>
-            <input {...register("telephone")} className="w-full border rounded-md p-2" placeholder="06********" />
-            {errors.telephone && <p className="text-red-500 text-sm">{errors.telephone.message}</p>}
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Matières enseignées *</label>
-            <Controller
-              name="matieres"
-              control={control}
-              render={({ field }) => (
-                <Select {...field} isMulti options={optionsMatieres} className="w-full" />
-              )}
+      {isEditing ? (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="firstName"
+            >
+              Prénom
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded"
             />
-            {errors.matieres && <p className="text-red-500 text-sm">{errors.matieres.message}</p>}
           </div>
 
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Photo de profil *</label>
-            <div {...getRootProps()} className="border-2 border-dashed p-4 text-center cursor-pointer rounded-md">
-              <input {...getInputProps()} />
-              {preview ? (
-                <img src={preview} alt="Prévisualisation" className="w-32 mx-auto" />
-              ) : (
-                <p className="text-gray-500">Glissez-déposez une image ici, ou cliquez pour sélectionner</p>
-              )}
-            </div>
-            {errors.photo && <p className="text-red-500 text-sm">{errors.photo.message}</p>}
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="lastName"
+            >
+              Nom
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded"
+            />
           </div>
 
-          <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-green-600 transition">Mettre à jour</button>
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="email"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              disabled
+              className="mt-1 p-2 w-full border border-gray-300 rounded bg-gray-100"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="phone"
+            >
+              Téléphone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="subjects"
+            >
+              Matières
+            </label>
+            <input
+              type="text"
+              id="subjects"
+              name="subjects"
+              value={formData.subjects}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-600"
+              htmlFor="status"
+            >
+              Statut
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="mt-1 p-2 w-full border border-gray-300 rounded"
+            >
+              <option value="permanent">Permanent</option>
+              <option value="vacataire">Vacataire</option>
+            </select>
+          </div>
+
+          <div className="flex justify-between items-center mt-4">
+            <button
+              type="button"
+              onClick={() => setIsEditing(false)}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Enregistrer
+            </button>
+          </div>
         </form>
-      </div>
+      ) : (
+        <div className="space-y-4">
+          <p>
+            <strong>Prénom :</strong> {professor.firstName}
+          </p>
+          <p>
+            <strong>Nom :</strong> {professor.lastName}
+          </p>
+          <p>
+            <strong>Email :</strong> {professor.email}
+          </p>
+          <p>
+            <strong>Téléphone :</strong> {professor.phone}
+          </p>
+          <p>
+            <strong>Matières :</strong> {professor.subjects}
+          </p>
+          <p>
+            <strong>Statut :</strong> {professor.status}
+          </p>
+
+          <button
+            onClick={() => setIsEditing(true)}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Modifier
+          </button>
+        </div>
+      )}
     </div>
   );
 };
