@@ -4,39 +4,48 @@ import jwt from "jsonwebtoken";
 
 // Inscription d'un utilisateur
 export const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
-    // Vérifier si l'email existe déjà
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Cet email est déjà utilisé." });
+    // Vérifier si l'utilisateur existe déjà
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Email déjà utilisé" });
     }
 
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Créer un nouvel utilisateur
-    const user = await User.create({
+    const newUser = new User({
       name,
       email,
-      password, // Le mot de passe sera hashé automatiquement grâce au middleware
+      password: hashedPassword,
+      role: role || "professor", // Par défaut, le rôle est "professor" si non spécifié
     });
+
+    // Sauvegarder l'utilisateur dans la base de données
+    await newUser.save();
 
     // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h", // Le token expire après 1 heure
-    });
+    const token = jwt.sign(
+      { id: newUser._id, role: newUser.role },
+      "secret_key",
+      { expiresIn: "1h" }
+    );
 
-    // Retourner le token et les informations de l'utilisateur (sans le mot de passe)
-    const userResponse = { ...user._doc };
-    delete userResponse.password;
-
-    res.status(201).json({ token, user: userResponse });
+    // Renvoyer une réponse réussie
+    res
+      .status(201)
+      .json({ success: true, message: "Inscription réussie", token });
   } catch (error) {
     console.error("Erreur lors de l'inscription :", error);
-    res
-      .status(500)
-      .json({ message: "Erreur lors de l'inscription", error: error.message });
+    res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
+
 //Login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -58,8 +67,13 @@ export const loginUser = async (req, res) => {
         .json({ success: false, message: "Email ou mot de passe incorrect" });
     }
 
-    // Connexion réussie
-    res.status(200).json({ success: true, message: "Connexion réussie", user });
+    // Générer un token JWT
+    const token = jwt.sign({ id: user._id, role: user.role }, "secret_key", {
+      expiresIn: "1h",
+    });
+
+    // Renvoyer une réponse réussie
+    res.status(200).json({ success: true, token, role: user.role });
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
     res.status(500).json({ success: false, message: "Erreur serveur" });

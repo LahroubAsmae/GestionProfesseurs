@@ -1,22 +1,17 @@
+// routes/professorRoutes.js
 import express from "express";
-
 import {
-  addProfessor,
-  getProfessors,
+  getProfessorProfile,
   updateProfessor,
-  deleteProfessor,
-  importProfessors,
-  getProfessorById,
 } from "../controllers/professorController.js";
+//import authMiddleware from "../middlwares/authMiddleware.js";
 
 const router = express.Router();
 
-// Routes pour les professeurs
-router.post("/", addProfessor);
-router.get("/", getProfessors);
-router.put("/:id", updateProfessor);
-router.delete("/:id", deleteProfessor);
-router.post("/import", importProfessors);
-router.get("/:id", getProfessorById);
+// Récupérer les données du professeur par email
+router.get("/profile/:email", getProfessorProfile);
+
+// Mettre à jour les données du professeur
+router.put("/update", updateProfessor);
 
 export default router;

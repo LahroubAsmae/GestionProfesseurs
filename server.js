@@ -5,24 +5,26 @@ import dotenv from "dotenv";
 import professorRoutes from "./routes/professorRoutes.js";
 import fileUpload from "express-fileupload";
 import authRoutes from "./routes/authRoutes.js";
-import multer from "multer";
+import adminRoutes from "./routes/adminRoutes.js";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // L'URL de votre frontend React
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(fileUpload());
-// Configure multer pour stocker les fichiers dans le dossier 'uploads/profiles'
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/profiles");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
-  },
+app.use("/uploads", express.static("uploads"));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
 });
-const upload = multer({ storage: storage });
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -31,9 +33,9 @@ mongoose
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
-app.use("/api/professors", professorRoutes);
-
 app.use("/api/auth", authRoutes);
+app.use("/api/professor", professorRoutes);
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
