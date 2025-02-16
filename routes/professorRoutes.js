@@ -2,9 +2,9 @@
 import express from "express";
 import {
   getProfessorProfile,
-  updateProfessor,
+  updateProfessorProfile,
 } from "../controllers/professorController.js";
-//import authMiddleware from "../middlwares/authMiddleware.js";
+import authMiddleware from "../middlwares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -12,6 +12,6 @@ const router = express.Router();
 router.get("/profile/:email", getProfessorProfile);
 
 // Mettre à jour les données du professeur
-router.put("/update", updateProfessor);
+router.put("/update/:id", updateProfessorProfile);
 
 export default router;

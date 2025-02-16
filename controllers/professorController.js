@@ -18,55 +18,30 @@ export const getProfessorProfile = async (req, res) => {
   }
 };
 
-// Mettre à jour les données du professeur
-export const updateProfessor = async (req, res) => {
-  const { authorization } = req.headers; // Récupérer l'en-tête Authorization
-  const { email, firstName, lastName, phone, subjects, status } = req.body;
+// Mise à jour du profil professeur par ID
+export const updateProfessorProfile = async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
 
-  // Vérifier que le token est présent dans les headers
-  if (!authorization) {
-    return res.status(401).json({ success: false, message: "Token manquant" });
+  const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'subjects', 'status'];
+  const missingFields = requiredFields.filter(field => updateData[field] === undefined || updateData[field] === '');
+
+  if (missingFields.length > 0) {
+    return res.status(400).json({ message: `Champs manquants : ${missingFields.join(', ')}` });
   }
 
   try {
-    // Extraire et vérifier le token JWT
-    const token = authorization.split(" ")[1]; // Assurez-vous que l'en-tête soit sous forme "Bearer token"
-    const decoded = jwt.verify(token, "votre_clé_secrète"); // Vérification du token (remplacez 'votre_clé_secrète' par votre clé secrète)
-
-    // Vérifier si l'email dans le token correspond à celui envoyé dans le body (optionnel, pour plus de sécurité)
-    if (decoded.email !== email) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Accès interdit" });
-    }
-
-    // Trouver le professeur et mettre à jour ses données
-    const professor = await Professor.findOneAndUpdate(
-      { email },
-      {
-        firstName,
-        lastName,
-        phone,
-        subjects,
-        status,
-      },
-      { new: true }
-    );
-
+    const professor = await Professor.findById(id);
     if (!professor) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Professeur non trouvé" });
+      return res.status(404).json({ message: "Professeur non trouvé" });
     }
 
-    // Renvoi de la réponse avec les données mises à jour
-    res.status(200).json({
-      success: true,
-      message: "Profil mis à jour avec succès",
-      professor,
-    });
+    Object.assign(professor, updateData);
+    await professor.save();
+
+    res.status(200).json({ message: "Profil mis à jour avec succès", professor });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour :", error);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error("Erreur lors de la mise à jour du profil :", error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };

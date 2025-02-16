@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import Professor from "../models/Professor.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -12,7 +12,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Décode le token avec la clé secrète
-    const user = await User.findOne({ _id: decoded._id });
+    const user = await Professor.findOne({ _id: decoded._id });
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
