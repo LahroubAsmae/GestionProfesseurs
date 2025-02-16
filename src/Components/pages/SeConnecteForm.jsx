@@ -12,27 +12,25 @@ const LoginForm = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
+    console.log("Données envoyées :", data); // Vérifier l'email et le mot de passe avant l'envoi
+  
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        data
-      );
-
-      // Sauvegarder le token, le rôle et l'email dans le localStorage
+      const response = await axios.post("http://localhost:5000/api/auth/login", data);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("role", response.data.role);
-      localStorage.setItem("email", data.email); // Sauvegarde de l'email
-
+      localStorage.setItem("email", data.email);
+  
       if (response.data.role === "admin") {
         navigate("/menu");
       } else {
         navigate("/profile");
       }
     } catch (error) {
-      console.error("Erreur lors de la connexion :", error);
-      alert("Une erreur s'est produite lors de la connexion.");
+      console.error("Erreur lors de la connexion :", error.response?.data || error);
+      alert(error.response?.data?.message || "Une erreur s'est produite lors de la connexion.");
     }
   };
+  
 
   return (
     <section className="h-screen flex items-center justify-center bg-gray-100">

@@ -110,20 +110,7 @@ const InscriptionForm = () => {
               )}
             </div>
 
-            {/* Champ Rôle */}
-            <div className="relative mb-6">
-              <select
-                {...register("role", { required: "Le rôle est requis" })}
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Sélectionnez un rôle</option>
-                <option value="admin">Admin</option>
-                <option value="professor">Professeur</option>
-              </select>
-              {errors.role && (
-                <p className="text-red-500 text-sm">{errors.role.message}</p>
-              )}
-            </div>
+            
 
             {/* Bouton d'inscription */}
             <button
