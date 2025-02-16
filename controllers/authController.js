@@ -48,34 +48,49 @@ export const signup = async (req, res) => {
 
 //Login
 export const loginUser = async (req, res) => {
+  console.log("Requête reçue avec :", req.body); // Ajout du log
+
   const { email, password } = req.body;
 
   try {
-    // Vérifier si l'utilisateur existe
+    const adminEmail = "admin@gmail.com";
+    const adminPassword = "Admin1234";
+
+    if (email === adminEmail) {
+      console.log("Tentative de connexion admin...");
+      
+      if (password !== adminPassword) {
+        console.log("Mot de passe incorrect pour admin");
+        return res.status(400).json({ success: false, message: "Email ou mot de passe incorrect" });
+      }
+
+      const token = jwt.sign({ role: "admin" }, "secret_key", { expiresIn: "1h" });
+      return res.status(200).json({ success: true, token, role: "admin" });
+    }
+
+    console.log("Recherche utilisateur dans la base de données...");
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email ou mot de passe incorrect" });
+      console.log("Utilisateur non trouvé !");
+      return res.status(400).json({ success: false, message: "Email ou mot de passe incorrect" });
     }
 
-    // Vérifier le mot de passe
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email ou mot de passe incorrect" });
+      console.log("Mot de passe incorrect !");
+      return res.status(400).json({ success: false, message: "Email ou mot de passe incorrect" });
     }
 
-    // Générer un token JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, "secret_key", {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: user._id, role: user.role }, "secret_key", { expiresIn: "1h" });
 
-    // Renvoyer une réponse réussie
+    console.log("Connexion réussie, envoi du token.");
     res.status(200).json({ success: true, token, role: user.role });
+
   } catch (error) {
     console.error("Erreur lors de la connexion :", error);
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 };
+
