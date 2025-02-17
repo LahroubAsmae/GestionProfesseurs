@@ -4,36 +4,25 @@ import { generateQRCode } from "../utils/generateQRCode.js";
 // Ajouter un professeur
 export const addProfessor = async (req, res) => {
   try {
-    const {
+    console.log("Données reçues :", req.body); // 🔍 Ajoute ceci pour voir les données reçues
+    const { firstName, lastName, email, phone, subjects, status } = req.body;
+    const profilePicture = req.file ? `/uploads/${req.file.filename}` : "";
+
+    const professor = new Professor({
       firstName,
       lastName,
       email,
       phone,
-      subjects,
+      subjects: JSON.parse(subjects),
       status,
       profilePicture,
-    } = req.body;
-
-    // Attendre la résolution de la promesse QR Code
-    const qrCodeUrl = await generateQRCode(email); // Utilisation de `await` ici pour attendre que la promesse se résolve
-
-    const newProfessor = new Professor({
-      firstName,
-      lastName,
-      email,
-      phone,
-      subjects,
-      status,
-      profilePicture,
-      qrCodeUrl,
     });
+    await professor.save();
 
-    await newProfessor.save();
-    res.status(201).json(newProfessor);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de l'ajout du professeur", error: err });
+    res.status(201).json(professor);
+  } catch (error) {
+    console.error("Erreur lors de l'ajout :", error);
+    res.status(500).json({ message: error.message });
   }
 };
 // Récupérer un professeur par ID
