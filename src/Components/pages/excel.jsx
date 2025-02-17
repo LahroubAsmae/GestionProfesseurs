@@ -43,31 +43,38 @@ const ExcelUploader = () => {
         }
 
         // Valider les données
-        const validData = jsonData
-          .filter((row) =>
-            requiredColumns.every(
-              (col) => row[col] !== undefined && row[col] !== ""
-            )
-          )
-          .map((row) => {
-            // Vérifier que le statut est valide
-            if (!["permanent", "vacataire"].includes(row.Statut)) {
-              throw new Error(
-                `Statut invalide pour ${row.Nom}. Doit être "permanent" ou "vacataire".`
-              );
-            }
+        const validData = jsonData.map((row) => {
+          if (
+            !row.Nom ||
+            !row.Email ||
+            !row.Telephone ||
+            !row.MatièresEnseignées ||
+            !row.Statut
+          ) {
+            throw new Error(
+              `Des champs obligatoires sont manquants pour ${
+                row.Nom || "un professeur"
+              }.`
+            );
+          }
 
-            return {
-              firstName: row.Nom.split(" ")[0],
-              lastName: row.Nom.split(" ")[1] || "",
-              email: row.Email,
-              phone: row.Telephone,
-              subjects: row.MatièresEnseignées,
-              status: row.Statut, // Utiliser le statut du fichier Excel
-              profilePicture: row.photo,
-              password: "defaultPassword", // Générer ou demander un mot de passe sécurisé
-            };
-          });
+          if (!["permanent", "vacataire"].includes(row.Statut.toLowerCase())) {
+            throw new Error(
+              `Statut invalide pour ${row.Nom}. Doit être "permanent" ou "vacataire".`
+            );
+          }
+
+          const nameParts = row.Nom.split(" ");
+          return {
+            firstName: nameParts[0],
+            lastName: nameParts.slice(1).join(" ") || "",
+            email: row.Email,
+            phone: row.Telephone,
+            subjects: row.MatièresEnseignées,
+            status: row.Statut.toLowerCase(),
+            profilePicture: row.photo || "",
+          };
+        });
 
         setData(validData);
       } catch (err) {
@@ -83,19 +90,17 @@ const ExcelUploader = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log("Data being sent to backend:", data); // Log the data
+      console.log("Données envoyées au backend :", data);
       const response = await axios.post(
-        "http://localhost:5000/api/professors/import",
-        {
-          professors: data,
-        }
+        "http://localhost:5000/api/admin/import",
+        { professors: data }
       );
       alert(response.data.message);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         "Erreur lors de l'importation des professeurs.";
-      alert(errorMessage); // Display specific error message
+      alert(errorMessage);
     }
   };
 
@@ -140,11 +145,11 @@ const ExcelUploader = () => {
               <tr className="bg-blue-500 text-white">
                 <th className="border border-gray-300 px-6 py-3">Nom</th>
                 <th className="border border-gray-300 px-6 py-3">Email</th>
-                <th className="border border-gray-300 px-6 py-3">Telephone</th>
+                <th className="border border-gray-300 px-6 py-3">Téléphone</th>
                 <th className="border border-gray-300 px-6 py-3">
                   Matières enseignées
                 </th>
-                <th className="border border-gray-300 px-6 py-3">Photos</th>
+                <th className="border border-gray-300 px-6 py-3">Photo</th>
                 <th className="border border-gray-300 px-6 py-3">Statut</th>
               </tr>
             </thead>
