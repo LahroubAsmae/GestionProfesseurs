@@ -1,57 +1,84 @@
 import React from "react";
 import {
+  Document,
   Page,
   Text,
   View,
-  Document,
-  StyleSheet,
   Image,
+  StyleSheet,
 } from "@react-pdf/renderer";
-import QRCode from "qrcode";
 
-// Styles PDF
 const styles = StyleSheet.create({
-  page: { flexDirection: "row", justifyContent: "center", padding: 20 },
-  card: {
-    width: 250,
-    height: 150,
-    padding: 10,
-    border: "1px solid black",
-    borderRadius: 5,
+  page: {
+    flexDirection: "column",
+    backgroundColor: "#ffffff",
+    padding: 20,
+    alignItems: "center",
   },
-  name: { fontSize: 14, fontWeight: "bold" },
-  subject: { fontSize: 12, marginTop: 5 },
-  image: { width: 50, height: 50, borderRadius: "50%", marginBottom: 5 },
-  qr: { marginTop: 10, width: 50, height: 50 },
+  cardContainer: {
+    width: 320,
+    border: "2px solid #3498db",
+    borderRadius: 10,
+    padding: 15,
+    textAlign: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#2c3e50",
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    border: "2px solid #3498db",
+    marginBottom: 10,
+  },
+  infoText: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: "#34495e",
+    textAlign: "left",
+    width: "100%",
+  },
+  qrCode: {
+    marginTop: 10,
+    width: 80,
+    height: 80,
+    alignSelf: "center",
+  },
+  boldLabel: {
+    fontWeight: "bold",
+    color: "#2c3e50",
+  },
 });
 
-// Fonction pour générer le QR code en base64
-const generateQRCode = async (name, subject) => {
-  const qrData = JSON.stringify({ nom: name, matiere: subject });
-  try {
-    return await QRCode.toDataURL(qrData);
-  } catch (error) {
-    console.error("Erreur de génération du QR Code :", error);
-    return "";
-  }
-};
-
-// Composant PDF
-const ProfessionalCard = ({ name, subject, photo, qrData }) => {
-  const [qrCodeImage, setQrCodeImage] = React.useState("");
-
-  React.useEffect(() => {
-    generateQRCode(name, subject).then(setQrCodeImage);
-  }, [name, subject]);
-
+const ProfessionalCard = ({ professor, qrCodeImage, photo }) => {
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.card}>
-          <Image style={styles.image} src={photo} />
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.subject}>{subject}</Text>
-          {qrCodeImage && <Image style={styles.qr} src={qrCodeImage} />}
+      <Page size="A6" style={styles.page}>
+        <View style={styles.cardContainer}>
+          <Text style={styles.title}>Carte Professionnelle</Text>
+
+          {/* Affichage de la photo du professeur */}
+          {photo && <Image src={photo} style={styles.profileImage} />}
+
+          <Text style={styles.infoText}>
+            <Text style={styles.boldLabel}>Nom Professeur :</Text>{" "}
+            {professor.lastName} {professor.firstName}
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.boldLabel}>Statut :</Text> {professor.status}
+          </Text>
+          <Text style={styles.infoText}>
+            <Text style={styles.boldLabel}>Matière Enseignée :</Text>{" "}
+            {professor.subjects}
+          </Text>
+
+          {/* QR Code */}
+          {qrCodeImage && <Image src={qrCodeImage} style={styles.qrCode} />}
         </View>
       </Page>
     </Document>
