@@ -10,23 +10,10 @@ const ProfessorSchema = new mongoose.Schema(
     subjects: { type: [String], required: true },
     status: { type: String, required: true },
     profilePicture: { type: String }, // Optionnel
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // 🔗 Lien avec User
   },
   { timestamps: true }
 );
-
-// Hash du mot de passe avant de sauvegarder
-/*ProfessorSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
-
-// Méthode pour comparer les mots de passe
-ProfessorSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};*/
 
 const Professor = mongoose.model("Professor", ProfessorSchema);
 

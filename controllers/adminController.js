@@ -1,6 +1,29 @@
 import Professor from "../models/Professor.js";
 import { generateQRCode } from "../utils/generateQRCode.js";
+import nodemailer from "nodemailer";
+import User from "../models/User.js";
+dotenv.config();
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import QRCode from "qrcode";
 
+// 📌 Générer un mot de passe sécurisé aléatoire
+const generatePassword = (length = 8) => {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+  return Array.from(
+    { length },
+    () => chars[Math.floor(Math.random() * chars.length)]
+  ).join("");
+};
+// 📌 Configurer le transporteur Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 // Ajouter un professeur
 export const addProfessor = async (req, res) => {
   try {
@@ -8,6 +31,34 @@ export const addProfessor = async (req, res) => {
     const { firstName, lastName, email, phone, subjects, status } = req.body;
     const profilePicture = req.file ? `/uploads/${req.file.filename}` : "";
 
+    // Vérifier si l'email existe déjà dans la collection Professor
+    const existingProfessor = await Professor.findOne({ email });
+    if (existingProfessor)
+      return res
+        .status(400)
+        .json({ message: "L'email est déjà utilisé dans la plateforme" });
+
+    // Vérifier si l'email existe déjà dans la collection User (si tu l'utilises aussi pour les utilisateurs généraux)
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res
+        .status(400)
+        .json({ message: "L'email est déjà utilisé dans l'application" });
+
+    // Générer et hasher le mot de passe
+    const password = generatePassword();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Créer l'utilisateur dans la collection User
+    const newUser = new User({
+      name: `${firstName} ${lastName}`,
+      email,
+      password: hashedPassword,
+      role: "professor",
+    });
+    await newUser.save();
+
+    // Créer le professeur dans la collection Professor
     const professor = new Professor({
       firstName,
       lastName,
@@ -19,12 +70,60 @@ export const addProfessor = async (req, res) => {
     });
     await professor.save();
 
+    // Envoyer l'email avec le mot de passe
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Bienvenue sur notre plateforme",
+      html: `
+        <h2>Bienvenue ${firstName} ${lastName} !</h2>
+        <p>Votre compte a été créé avec succès.</p>
+        <p>Voici votre mot de passe temporaire :</p>
+        <h3>${password}</h3>
+        <p>Connectez-vous et changez votre mot de passe dès que possible.</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
     res.status(201).json(professor);
   } catch (error) {
     console.error("Erreur lors de l'ajout :", error);
     res.status(500).json({ message: error.message });
   }
 };
+//recuperer les donner pour generer des cartes
+export const GeneratCard = async (req, res) => {
+  const { email } = req.body; // L'email envoyé dans la requête
+
+  try {
+    // Recherche du professeur dans la base de données
+    const professor = await Professor.findOne({ email });
+
+    if (!professor) {
+      return res.status(404).json({ error: "Professeur non trouvé" });
+    }
+
+    // Générer un QR code avec les informations du professeur
+    const qrData = JSON.stringify({
+      firstName: professor.firstName,
+      lastName: professor.lastName,
+      email: professor.email,
+      phone: professor.phone,
+      subjects: professor.subjects,
+      status: professor.status,
+    });
+    console.log("Recherche du professeur avec email:", email); // Vérifie l'email envoyé
+
+    const qrCode = await QRCode.toDataURL(qrData);
+
+    // Retourner les informations du professeur avec le QR code
+    res.json({ professor, qrCode });
+  } catch (error) {
+    console.error("Erreur lors de la génération de la carte:", error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
+};
+
 // Récupérer un professeur par ID
 export const getProfessorById = async (req, res) => {
   try {
