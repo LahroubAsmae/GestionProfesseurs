@@ -95,11 +95,11 @@ Pour assurer une bonne communication entre les membres de l'équipe avec limitat
 
 
 ### 📋 Dashboard Professeurs
-[Dashboard](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/dashbordAdmin.png)
+![Dashboard](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/dashbordAdmin.png)
 
 
 ### 📄 Ajouter un Professeur
-[Ajout Professeur](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/Ajoutprofesseur.png)
+![Ajout Professeur](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/Ajoutprofesseur.png)
 [Envoie Email](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/e31f9f91-149b-4816-9a4b-444189b49671.jpg)
 
 
