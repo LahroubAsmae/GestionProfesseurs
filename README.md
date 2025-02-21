@@ -2,7 +2,7 @@
 
 ## 🎯 Objectif
 
-Le but de ce projet est de développer une application web permettant la gestion des professeurs d'une institution académique. Les principales fonctionnalités incluent la saisie des informations des professeurs, l'importation des données via Excel et la génération de cartes professionnelles. Ce projet a été développé en **X jours**.
+Le but de ce projet est de développer une application web permettant la gestion des professeurs d'une institution académique. Les principales fonctionnalités incluent la saisie des informations des professeurs, l'importation des données via Excel et la génération de cartes professionnelles. Ce projet a été développé en **23 jours**.
 
 ## 📋 Fonctionnalités de l'application
 
@@ -110,10 +110,10 @@ Pour assurer une bonne communication entre les membres de l'équipe avec limitat
 
 ### 🎟️ Carte Professionnelle Générée
 ![Carte Professionnelle](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/GeneratCard.png)
-![](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/pdf.png)
-![](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ScanCard.jpg)
+![carte pdf](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/pdf.png)
+![details scan](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ScanCard.jpg)
 
-### 🎟️ Gestion des utilisateurs(professeurs)
+### 🎟️ Gestion des utilisateurs
 ![liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ListeProfessur.png)
 ### 🎟️ Espace de Professeur
 ![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/ProfesseurProfile.png)
