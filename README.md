@@ -100,22 +100,22 @@ Pour assurer une bonne communication entre les membres de l'équipe avec limitat
 
 ### 📄 Ajouter un Professeur
 ![Ajout Professeur](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/Ajoutprofesseur.png)
-[Envoie Email](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/e31f9f91-149b-4816-9a4b-444189b49671.jpg)
+![Envoie Email](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/e31f9f91-149b-4816-9a4b-444189b49671.jpg)
 
 
 ### 📜 Importer un Fichier Excel
-[Import Excel](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/importExcel.png)
-[](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/FichierExcel.png)
+![Import Excel](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/importExcel.png)
+![](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/FichierExcel.png)
 
 
 ### 🎟️ Carte Professionnelle Générée
-[Carte Professionnelle](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/GeneratCard.png)
-[](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/pdf.png)
-[](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ScanCard.jpg)
+![Carte Professionnelle](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/GeneratCard.png)
+![](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/pdf.png)
+![](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ScanCard.jpg)
 
 ### 🎟️ Gestion des utilisateurs(professeurs)
-[liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ListeProfessur.png)
+![liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ListeProfessur.png)
 ### 🎟️ Espace de Professeur
-[Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/ProfesseurProfile.png)
-[Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/UpdateProfile.png)
+![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/ProfesseurProfile.png)
+![Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/UpdateProfile.png)
 
