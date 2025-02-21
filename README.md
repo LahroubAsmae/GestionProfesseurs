@@ -114,8 +114,8 @@ Pour assurer une bonne communication entre les membres de l'équipe avec limitat
 ![details scan](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ScanCard.jpg)
 
 ### 🎟️ Gestion des utilisateurs
-![liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ListeProfessur.png)
+![liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ListeProfessur.png)
 ### 🎟️ Espace de Professeur
-![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/ProfesseurProfile.png)
-![Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/assets/UpdateProfile.png)
+![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ProfesseurProfile.png)
+![Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/UpdateProfile.png)
 
