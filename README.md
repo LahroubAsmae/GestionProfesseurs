@@ -116,6 +116,6 @@ Pour assurer une bonne communication entre les membres de l'équipe avec limitat
 ### 🎟️ Gestion des utilisateurs
 ![liste professeurs](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ListeProfessur.png)
 ### 🎟️ Espace de Professeur
-![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/ProfesseurProfile.png)
-![Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/assets/UpdateProfile.png)
+![Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/ProfesseurProfile.png)
+![Modifier Profile](https://github.com/LahroubAsmae/GestionProfesseurs/blob/main/assets/UpdateProfile.png)
 
